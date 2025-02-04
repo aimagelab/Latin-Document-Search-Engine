@@ -4,8 +4,8 @@ from absl import flags
 from ml_collections.config_flags import config_flags
 import os
 import json
-from utils.launcher_utils import get_best_results
-from transformers import AutoTokenizer, AutoModelForMaskedLM
+from utils.launcher_utils import get_best_results, custom_get_best_results
+from transformers import AutoTokenizer, AutoModelForMaskedLM, AutoModel
 import torch
 from transformers import pipeline
 import faiss
@@ -14,10 +14,9 @@ import sqlite3
 import numpy as np
 import ast
 
-
 # Commandline arguments
 FLAGS = flags.FLAGS
-config_flags.DEFINE_config_file("config", "/home/giuliofederico/Itserr/config/index_config.py", "configuration.", lock_config=True)
+config_flags.DEFINE_config_file("config", "config/index_config.py", "configuration.", lock_config=True)
 flags.mark_flags_as_required(["config"])
 
 import unicodedata
@@ -26,7 +25,7 @@ import re
 from bs4 import BeautifulSoup
 
 SHOW_CIT = False
-SHOW_MATCH = False
+SHOW_MATCH = True
 
 def highlight_words_in_html(html, parole, stile):
     soup = BeautifulSoup(html, "html.parser")  
@@ -59,24 +58,26 @@ def main(argv):
     H = FLAGS.config
 
     #TODO in the future change DB and index based on dropdown option
-    device = H.run.device if torch.cuda.is_available() else -1
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
     #load tokenizer and model
     tokenizer = AutoTokenizer.from_pretrained(H.model.tokenizer)
-    model = AutoModelForMaskedLM.from_pretrained(H.model.model).to(device)
+    model = AutoModel.from_pretrained(H.model.model).to(device)
+    tokenizer.model_max_length = 512
+    model.eval()
+    # model = AutoModelForMaskedLM.from_pretrained(H.model.model).to(device)
 
-    #load index
-    index = faiss.read_index(os.path.join(H.index.index_path,f"{H.index.index_name}.index"))
+    # load index and keys
+    index = faiss.read_index(os.path.join(H.index.index_path,f"{H.index.index_name}"))
+    with open(H.index.idx_2_keys, 'r') as f:
+        idx_2_keys = json.load(f)
 
     #create or open db
-    path_to_load_db = os.path.join(H.db.db_path,f"{H.db.db_name}.db")
-    connection = sqlite3.connect(path_to_load_db, check_same_thread=False)
-
-    m = connection.total_changes
-
-    assert m == 0, "ERROR: cannot open database."
-
-    cursor = connection.cursor()
+    # path_to_load_db = os.path.join(H.db.db_path,f"{H.db.db_name}.db")
+    # connection = sqlite3.connect(path_to_load_db, check_same_thread=False)
+    # m = connection.total_changes
+    # assert m == 0, "ERROR: cannot open database."
+    # cursor = connection.cursor()
 
 
     def process_inputs(text, number, option):
@@ -87,16 +88,18 @@ def main(argv):
                 <p>Insert a valid query.</p>
             </div> """
         
-        best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
+        # best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
+        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device )
+
         #print(best_results)
         results = []
         for i in range(number):
             result = {
                 "Book": best_results[i]['book_name'],
-                "author_id": best_results[i]['author_id'],
+                # "author_id": best_results[i]['author_id'],
                 "id": best_results[i]['id'],
                 "name": best_results[i]['name'],
-                "match": best_results[i]['sentence'],
+                "match": best_results[i]['match'],
                 "citations": best_results[i]['citations']
             }
             results.append(result)
@@ -106,6 +109,7 @@ def main(argv):
         results_html = ""
         for result in results:
             match_text = result['match']
+            cit = result['citations']
            
             if SHOW_CIT:
                 # Normalizzare match_text rimuovendo i caratteri speciali
@@ -114,7 +118,7 @@ def main(argv):
                 # Convertire la stringa 'citations' in una lista di dizionari
                 if result['citations']:
                     try:
-                        citations = ast.literal_eval(result['citations'])
+                        # citations = ast.literal_eval(result['citations'])
                         placeholders = {}  # Dizionario per tracciare i segnaposto
                         placeholder_template = "__CITATION_PLACEHOLDER_{}__"
 
@@ -139,7 +143,7 @@ def main(argv):
             
             if SHOW_MATCH:
                 #evidenzia nei risultati tutte le parole comuni con la query
-                words_text = re.findall(r'\b\w+\b', text)  # Converting to lowercase per confronti insensibili al maiuscolo/minuscolo
+                words_text = re.findall(r'\b\w+\b', cit)  # Converting to lowercase per confronti insensibili al maiuscolo/minuscolo
 
                 #Controllare se ciascuna parola della query è presente nel test matchato
                 words_match_text = re.findall(r'\b\w+\b', match_text)  
@@ -147,29 +151,32 @@ def main(argv):
                 #Troviamo le parole che si trovano in entrambe le stringhe
                 common_words = [word for word in words_text if word in words_match_text]
 
-                stile_css = "font-weight: bold; color: blue;"
-
+                stile_css = "font-weight: bold; text-decoration: underline"
+                # color: blue;
                 match_text = highlight_words_in_html(match_text, common_words, stile_css)
 
 
             # Creare una box per ogni risultato
             results_html += f"""
-            <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: black">
+            <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
                 <strong>Book:</strong> {result['Book']}<br>
-                <strong>author_id:</strong> {result['author_id']}<br>
                 <strong>id:</strong> {result['id']}<br>
                 <strong>name:</strong> {result['name']}<br>
                 <strong>match:</strong> {match_text}<br>
+                <strong>citation:</strong> {cit}<br>
             </div>
             """
+            # <strong>author_id:</strong> {result['author_id']}<br>
 
         # Aggiungere il CSS per l'effetto hover
         results_html += """
         <style>
             .citation {
-                color: rgb(1, 3, 39);  /* Cambia il colore al passaggio del mouse */
-                text-decoration-line: underline;  /* Opzionale: rendere il testo più evidente */
-
+                color: rgb(1, 3, 39);  /* Text color */
+                text-decoration-line: underline;  /* Underline text */
+                background-color: #f8f9fa;  /* Change background color */
+                padding: 2px 5px; /* Optional: Add padding for better visibility */
+                border-radius: 3px; /* Optional: Round the edges */
             }
 
             /* Aggiungere un effetto al passaggio del mouse */
@@ -183,7 +190,7 @@ def main(argv):
             .citation[data-citation]:hover::after {
                 content: attr(data-citation);  /* Mostra il contenuto del tooltip */
                 position: absolute;
-                background: rgba(0, 0, 0, 0.7);
+                background: rgba(0, 0, 109, 0.8);
                 color: white;
                 padding: 5px;
                 border-radius: 5px;
@@ -204,10 +211,10 @@ def main(argv):
                     placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
                     label="Enter query"),
         gr.Slider(1, 10, step=1, label="Choose how many results to return"),
-        gr.Dropdown(["DB_Greek"], label="Select the database where to search"),
+        gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
     ],
     outputs=gr.HTML(),
-    title="Greek Document Search Engine",
+    title="Latin Document Search Engine",
     description="Enter a text query and the number of results you want to get. The system will search the documents for the best results and automatically sort them.",
     )
 
@@ -218,3 +225,4 @@ def main(argv):
 
 if __name__ == '__main__':
     app.run(main)
+    

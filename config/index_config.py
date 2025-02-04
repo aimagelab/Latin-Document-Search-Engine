@@ -29,7 +29,7 @@ def get_config():
         
         So, json_dataset_path is the absolute path to 'dataset_name'
     '''
-    data.json_dataset_path = "/home/giuliofederico/dataset/tlg"
+    data.json_dataset_path = "/work/pnrr_itserr/WP4-embeddings/latin_data/db_data"
 
     '''
     When creating the index, sentences are broken up into low and high points. However, some sentences, if broken up, do not make much sense on their own.
@@ -43,12 +43,13 @@ def get_config():
 
     #lenght of the embedding of each sentence. Will be used to inizialize the index
     data.len_embedding = 768
+    data.window_data = 1
 
 
     config.model = model = ConfigDict()
 
-    model.tokenizer = "bowphs/GreBerta"
-    model.model = "bowphs/GreBerta"
+    model.tokenizer = "/work/pnrr_itserr/WP8-embeddings/checkpoints/models--bowphs--LaBerta/snapshots/94fab85783dca8a16529cda2b58760d03bd5d9c1"
+    model.model = "/work/pnrr_itserr/WP8-embeddings/checkpoints/models--bowphs--LaBerta/snapshots/94fab85783dca8a16529cda2b58760d03bd5d9c1"
     #max number of tokens the model can handle
     model.model_max_length = 512
     #when decide to join two words w1-w2, check if w2 is in the top_k next words after w1
@@ -56,13 +57,20 @@ def get_config():
 
 
     config.index = index = ConfigDict()
-    index.index_path = "/home/giuliofederico/Itserr"
-    index.index_name ="Faiss_Greek"
+    # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path"
+    
+    # debug mode
+    index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/debug"
+    index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/debug/knn.json"
+    
+    # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path"
+    # index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/knn.json"
+
+    index.index_name ="knn.index"
 
     config.db = db = ConfigDict()
-    db.db_path = "/home/giuliofederico/Itserr"
-    db.db_name ="DB_Greek"
-
+    db.db_path = ""
+    db.db_name ="DB_Latin"
 
 
     #not important. Just if you want to execute test_index.py
