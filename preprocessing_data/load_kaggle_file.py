@@ -3,10 +3,12 @@
 # print("Path to dataset files:", path)
 
 import os
+import re
 import json
 from tqdm import tqdm 
 import pandas as pd
 from cltk.tokenizers.lat.lat import LatinPunktSentenceTokenizer as SentenceTokenizer
+from preprocessing_data.contractions import contractions, tokenize_clean
 
 # path_lemmas = '/work/pnrr_itserr/WP4-embeddings/latin_data/3/latin_lemmas.csv'
 # df_lemmas = pd.read_csv(path_lemmas, nrows=1000)
@@ -30,7 +32,9 @@ for author, samples in tqdm(df_raw.groupby('author'), mininterval=1, maxinterval
         # data['text'] = sample['text']
         id = sample['Unnamed: 0'].split('\\')[-1].split('.')[0]
         data['id'] = author_formatted + '_' + id
-        data['content'] = sent_tokenizer.tokenize(data['text'])
+        
+        clean_text = tokenize_clean(sample['text'])
+        data['content'] = sent_tokenizer.tokenize(clean_text)
         
         with open(os.path.join(folder_author_name, data['id'] + '.json'), 'w') as f:
             json.dump(data, f)

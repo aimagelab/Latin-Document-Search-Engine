@@ -3,6 +3,7 @@ import json
 import numpy as np
 import torch
 import faiss
+from preprocessing_data.contractions import contractions, tokenize_clean
 
 def get_best_results(index, H, cursor, query, tokenizer, model, k=1, device=None):
 
@@ -48,6 +49,7 @@ def get_best_results(index, H, cursor, query, tokenizer, model, k=1, device=None
 
 
 def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, device=None):
+    query = tokenize_clean(query)
     
     with torch.no_grad():
         tokenized = tokenizer(query, padding=True, truncation=True, return_tensors='pt').to(device)
