@@ -2,7 +2,6 @@ from cltk.tokenizers.lat.lat import LatinWordTokenizer
 from string import punctuation
 from cltk.alphabet.lat import normalize_lat
 from cltk.stops.lat import STOPS
-import pycld2 as cld2
 import re
 
 
@@ -18,13 +17,6 @@ def tokenize_clean(text):
     # pattern = r"\b(?=[MDCLXVIΙ])M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})([IΙ]X|[IΙ]V|V?[IΙ]{0,3})\b\.?"
     # text = re.sub(pattern, '', text)
     text = "".join(x for x in text if x.isascii())
-
-    _, _, _, detected_language = cld2.detect(text,  returnVectors=True)
-    # print(detected_language)
-    cleaned_text = []
-    for langs in detected_language:
-        if langs[2] not in ["Unknown", "Latin"]:
-            cleaned_text.append(text[langs[0]:langs[0]+langs[1]])
 
     text = normalize_lat(text, True, True, True, True)
     # re.sub(r'[^\w\s\.,:;\!\?]', "", text)

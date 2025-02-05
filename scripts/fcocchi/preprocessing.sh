@@ -8,7 +8,7 @@
 #SBATCH --mem=128G
 #SBATCH --cpus-per-task=8
 #SBATCH --account=pnrr_itserr
-#SBATCH --time=02:00:00
+#SBATCH --time=24:00:00
 #SBATCH --partition=all_usr_prod
 ##SBATCH --constraint="gpu_A40_48G|gpu_RTX5000_16G|gpu_RTXA5000_24G|gpu_RTX6000_24G|gpu_2080Ti_11G"
 
