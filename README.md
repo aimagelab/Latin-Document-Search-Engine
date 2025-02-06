@@ -1,4 +1,4 @@
-# Greek Document Search Engine
+# Latin Document Search Engine
 
 <p float="center">
   <img src="chrome-capture-2025-1-25.gif" />
