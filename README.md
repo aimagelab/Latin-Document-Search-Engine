@@ -6,39 +6,37 @@
 
 ## Overview
 
-The **Greek Document Search Engine** is a powerful search tool designed for querying large databases of Greek documents. This project utilizes advanced natural language processing (NLP) and machine learning techniques to provide accurate search results from a selection of pre-indexed texts. The system is built with flexibility in mind, allowing users to specify various search parameters and customize the number of results they want to retrieve.
+The **Latin Document Search Engine** is a powerful search tool designed for querying large databases of Latin documents. This project utilizes advanced natural language processing (NLP) and machine learning techniques to provide accurate search results from a selection of pre-indexed texts. The system is built with flexibility in mind, allowing users to specify various search parameters and customize the number of results they want to retrieve.
 
-Users can input a query in Greek, and the system will return the most relevant sentences from documents based on the context of the search term, highlighting matching words and citations within the text. 
+Users can input a query in Latin, and the system will return the most relevant sentences from documents based on the context of the search term, highlighting the retrieved sentence in the context. 
 
 ### Key Features
-- **Flexible Query Input**: Users can input Greek text and specify the number of results they want to retrieve.
+- **Flexible Query Input**: Users can input Latin text and specify the number of results they want to retrieve.
 - **Contextual Search**: The search engine analyzes the context and content of the query, matching it to the most relevant sentences in various documents in the database.
-- **Word Matching & Highlighting**: The engine highlights common words between the query and the results to provide better search accuracy.
-- **Citations Highlighting**: Citations within the results are highlighted and can be hovered over to show additional information.
 
 ### How It Works
 
-1. **User Input**: The user inputs a Greek text query into the system along with the number of search results they wish to retrieve.
+1. **User Input**: The user inputs a Latin text query into the system along with the number of search results they wish to retrieve.
 2. **Text Processing**: The query text is preprocessed to normalize any special characters, removing unnecessary spaces and invisible characters.
-3. **Model & Index Loading**: The system loads a pre-trained masked language model (https://huggingface.co/bowphs/GreBerta) and an index built from the Greek document database to retrieve the best matches.
-4. **Database Search**: The system uses a combination of FAISS for fast similarity search and SQLite for managing metadata about the documents in the database.
-5. **Result Presentation**: The system outputs a series of results with contextual matches, showing relevant document sections. Citations within these matches are highlighted and can be interacted with for further information.
+3. **Model & Index Loading**: The system loads a pre-trained masked language model (https://huggingface.co/bowphs/LaBerta) and an index built from the Greek document database to retrieve the best matches.
+4. **Database Search**: The system uses a FAISS index for fast similarity search between documents and the user query.
+5. **Result Presentation**: The system outputs a series of results with contextual matches, showing relevant document sections.
 
 ### Requirements
 
-- Python 3.x
-- Gradio
-- Hugging Face Transformers
-- FAISS
-- SQLite
-- PyTorch
-- Absl
+To create the conda environment named ```itserr``` use the following instructions.
+With this environment you will have all the packages to run the code in this repo. 
+```
+conda create -n itserr python==3.8.16
+conda activate itserr
+pip install -r requirements.txt
+```
 
 ## Dataset
 The dataset, which cannot be shared, must be structured as follows:
 - db_folder
-   1. document_1
-      - json_file_1
+   1. document_1 (author-name)
+      - json_file_1 (author-name_sample-id)
       - json_file_2
       - ....
 
@@ -50,27 +48,14 @@ The dataset, which cannot be shared, must be structured as follows:
 where each json has this format (an example in provided):
 ```
 {
-    "author_id": "1207",
-    "id": "001",
-    "name": "Fragmenta Aratea",
+    "author": "ornelius Celsus",
+    "title": "De medicina - Ed. Daremberg",
+    "id": "ornelius_Celsus_12648",
     "content": [
-        {
-            "citation": "1.1",
-            "text": " Hipparch. I p. 1013A (178P. 24M.) ὅτι μὲν οὖν Εὐδόξωι "
-        },
-        {
-            "text": "ἐπακολουθήσας ὁ Ἄρατος συντέταχε τὰ Φαινόμενα, ἱκανῶς οἶ"
-        },
-        {
-            "text": "μαι δεικνύναι διὰ τῶν προειρημένων, ἐν οἷς δὲ διαπίπτουσιν "
-        },
-        {
-            "text": "οὗτοί τε καὶ οἱ συνεπιγραφόμενοι αὐτοῖς, ὧν ἐστι καὶ Α*ΤΤΑΛΟΣ, "
-        },
-        {
-            "citation": "1.5",
-            "text": "νῦν ὑποδείξομεν. ἐκθησόμεθα δὲ εὐθέως καὶ ἐν οἷς ἰδίαι ἕκαστος "
-        },
+        "a. cornelii celsi artium liber sextus idem medicinae primus.",
+        "prooemium.",
+        "conspectus historiae medicinae.",
+        "quae ratio medicinae potissima sit.",
       ...
 ```
 ## Config file
@@ -93,9 +78,9 @@ Before starting the creation of the index, database and launching the UI, it is 
 
 
 ## Running the Project
-To create a FAISS index and a SQL database, run the following script:
+To create a FAISS index run the following script:
 ```
-nohup python -u create_index.py --config "./config/index_config.py" > log.txt 2>&1 &
+sbatch scripts/fcocchi/create_index.sh
 ```
 where the config file is the one seen in the previous section.
 
