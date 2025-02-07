@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=create_index
-#SBATCH --output=/work/pnrr_itserr/WP8-embeddings/logs/%x-%j
-#SBATCH --error=/work/pnrr_itserr/WP8-embeddings/logs/%x-%j
+#SBATCH --output=/work/pnrr_itserr/WP8-embeddings/logs/%x-%j.out
+#SBATCH --error=/work/pnrr_itserr/WP8-embeddings/logs/%x-%j.err
 #SBATCH --open-mode=truncate
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
