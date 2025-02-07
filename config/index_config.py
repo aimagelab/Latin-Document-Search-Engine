@@ -63,7 +63,7 @@ def get_config():
     # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/debug"
     # index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/debug/knn.json"
     
-    index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/complete/knn.index"
+    index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/complete"
     index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/complete/knn.json"
     
     # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path"
