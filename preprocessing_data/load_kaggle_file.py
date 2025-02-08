@@ -16,7 +16,7 @@ from preprocessing_data.contractions import contractions, tokenize_clean
 db_data = '/work/pnrr_itserr/WP4-embeddings/latin_data/db_data'
 
 path_raw = '/work/pnrr_itserr/WP4-embeddings/latin_data/3/latin_raw.csv'
-df_raw = pd.read_csv(path_raw) #, nrows=1000
+df_raw = pd.read_csv(path_raw, nrows=1000) #, nrows=1000
 
 df_raw.head()
 sent_tokenizer = SentenceTokenizer()
@@ -36,7 +36,11 @@ for author, samples in tqdm(df_raw.groupby('author'), mininterval=1, maxinterval
         check_data_id.append(data['id'])
         
         clean_text = tokenize_clean(sample['text'])
-        data['content'] = sent_tokenizer.tokenize(clean_text)
+        clean_text = sent_tokenizer.tokenize(clean_text)
+        if len(clean_text) == 1:
+            data['content'] = clean_text
+        else:
+            data['content'] = clean_text[:len(clean_text)//2]
         
         with open(os.path.join(folder_author_name, data['id'] + '.json'), 'w') as f:
             json.dump(data, f)
