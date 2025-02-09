@@ -88,8 +88,8 @@ def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, 
         # json_result[r]['author_id'] = ...
         json_result[r]['id'] = idx_2_keys[idx]
         json_result[r]['name'] = data_content['author']
-        json_result[r]['match'] = window_data
-        json_result[r]['citations'] = data_content['content'][content_id]
+        json_result[r]['context'] = window_data
+        json_result[r]['exact_match'] = data_content['content'][content_id]
         json_result[r]['book_name'] = data_content['title']
         
         r+=1

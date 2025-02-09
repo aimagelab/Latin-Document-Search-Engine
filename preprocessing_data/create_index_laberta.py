@@ -46,26 +46,28 @@ for el_auth in tqdm(debug_for):
         with open(el_sample_path, 'r') as f:
             data = json.load(f)
         count_content = 0
-        for i in range(0, len(data['content']), batch_size):
-                        
-            with torch.no_grad():
-                val = data['content'][i:i+batch_size]
-                tokenized = tokenizer(val, padding=True, truncation=True, return_tensors='pt').to(model.device)
-                outputs = model(**tokenized)
-                model_cls = outputs.last_hidden_state[:, 0]
-                model_cls = model_cls.cpu().detach().numpy()
-                # model_cls = tmp_var[:len(val)]
-                faiss.normalize_L2(model_cls)
-                try:
-                    faiss_list_cls.append(model_cls)
-                    count += model_cls.shape[0]
+        if len(data['content']) > 1:
+            for i in range(0, len(data['content']), batch_size):
+                            
+                with torch.no_grad():
+                    val = data['content'][i:i+batch_size]
+                    tokenized = tokenizer(val, padding=True, truncation=True, return_tensors='pt').to(model.device)
+                    outputs = model(**tokenized)
+                    model_cls = outputs.last_hidden_state[:, 0]
+                    model_cls = model_cls.cpu().detach().numpy()
+                    # model_cls = tmp_var[:len(val)]
+                    faiss.normalize_L2(model_cls)
+                    try:
+                        faiss_list_cls.append(model_cls)
+                        count += model_cls.shape[0]
 
-                    for _ in range(0, model_cls.shape[0], 1):
-                        count_content += 1
-                        faiss_list_id.append(data['id'] + '_' + str(count_content))
-                except:
-                    print(f'Error {data["id"]}')
-                assert count == len(faiss_list_id)
+                        for _ in range(0, model_cls.shape[0], 1):
+                            count_content += 1
+                            faiss_list_id.append(data['id'] + '_' + str(count_content))
+                    except:
+                        raise Exception (f"Error dimension: {data['id']}")
+                    assert count == len(faiss_list_id)
+            assert count_content == len(data['content'])
 
 faiss_list_cls = np.concatenate(faiss_list_cls, axis=0)
 np.save(tmp_save_directory, faiss_list_cls)

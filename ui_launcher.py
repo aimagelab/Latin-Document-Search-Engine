@@ -99,17 +99,16 @@ def main(argv):
                 # "author_id": best_results[i]['author_id'],
                 "id": best_results[i]['id'],
                 "name": best_results[i]['name'],
-                "match": best_results[i]['match'],
-                "citations": best_results[i]['citations']
+                "context": best_results[i]['context'],
+                "exact_match": best_results[i]['exact_match']
             }
             results.append(result)
-        
-        
+
         # Creare una stringa HTML per visualizzare tutti i risultati
         results_html = ""
         for result in results:
-            match_text = result['match']
-            cit = result['citations']
+            match_text = result['context'] # window of context of the passage
+            cit = result['exact_match'] # represent the exact retrieved passage
            
             if SHOW_MATCH:
                 #evidenzia nei risultati tutte le parole comuni con la query
