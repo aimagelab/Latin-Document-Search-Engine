@@ -31,6 +31,8 @@ conda create -n itserr python==3.10.15
 conda activate itserr
 pip install -r requirements.txt
 ```
+We suggest to install the correct torch version before the complete installation of the requirements file.
+Moreover, we add a second requirements file in case of problem during the environment installation.
 
 ## Dataset
 The dataset, which cannot be shared, must be structured as follows:

@@ -72,7 +72,9 @@ def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, 
         variable_split = idx_2_keys[idx].split('_')
         folder = '_'.join(variable_split[:-2])
         json_file = '_'.join(variable_split[:-1]) + '.json'
-        content_id = int(variable_split[-1])
+        
+        # it is necessary to remove one element from the content_id because the index starts from 1 when we tokenize the batch
+        content_id = int(variable_split[-1]) - 1
         
         file_open = os.path.join(H.data.json_dataset_path, folder, json_file)
         with open(file_open, 'r') as f:
