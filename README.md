@@ -27,7 +27,7 @@ Users can input a query in Latin, and the system will return the most relevant s
 To create the conda environment named ```itserr``` use the following instructions.
 With this environment you will have all the packages to run the code in this repo. 
 ```
-conda create -n itserr python==3.8.16
+conda create -n itserr python==3.10.15
 conda activate itserr
 pip install -r requirements.txt
 ```
