@@ -120,7 +120,7 @@ def main(argv):
                 #Troviamo le parole che si trovano in entrambe le stringhe
                 common_words = [word for word in words_text if word in words_match_text]
 
-                stile_css = "font-weight: bold; text-decoration: underline"
+                stile_css = "font-weight: bold; text-decoration: underline; color: white"
                 # color: blue;
                 match_text = highlight_words_in_html(match_text, common_words, stile_css)
 
