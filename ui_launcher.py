@@ -72,7 +72,7 @@ def main(argv):
     with open(H.index.idx_2_keys, 'r') as f:
         idx_2_keys = json.load(f)
 
-    #create or open db
+    # create or open db
     # path_to_load_db = os.path.join(H.db.db_path,f"{H.db.db_name}.db")
     # connection = sqlite3.connect(path_to_load_db, check_same_thread=False)
     # m = connection.total_changes
