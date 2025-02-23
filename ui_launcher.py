@@ -56,7 +56,11 @@ def normalize_text(text):
 def main(argv):
 
     H = FLAGS.config
-
+    
+    # create a list of authors, used to filter the results
+    list_of_works = [e for e in os.listdir(H.data.json_dataset_path)]
+    list_of_works = set(list_of_works)
+    
     #TODO in the future change DB and index based on dropdown option
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 

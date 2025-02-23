@@ -53,7 +53,7 @@ def get_config():
     #max number of tokens the model can handle
     model.model_max_length = 512
     #when decide to join two words w1-w2, check if w2 is in the top_k next words after w1
-    model.top_k = 10
+    model.top_k = 30
 
 
     config.index = index = ConfigDict()
