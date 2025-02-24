@@ -48,7 +48,7 @@ def get_best_results(index, H, cursor, query, tokenizer, model, k=1, device=None
     return json_result
 
 
-def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, device=None):
+def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, device=None, works_selected='', additional_text='', additional_text_slider_value=0.0):
     query = tokenize_clean(query)
     
     with torch.no_grad():
@@ -56,7 +56,18 @@ def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, 
         outputs = model(**tokenized)
         model_cls = outputs.last_hidden_state[:, 0]
         model_cls = model_cls.cpu().detach().numpy()
-        faiss.normalize_L2(model_cls)
+
+    if additional_text != '':
+        additional_text = tokenize_clean(additional_text)
+        with torch.no_grad():
+            tokenized_additional_text = tokenizer(additional_text, padding=True, truncation=True, return_tensors='pt').to(device)
+            outputs_additional_text = model(**tokenized_additional_text)
+            additional_text_cls = outputs_additional_text.last_hidden_state[:, 0]
+            additional_text_cls = additional_text_cls.cpu().detach().numpy()
+            
+        model_cls = model_cls*(1-additional_text_slider_value) + additional_text_cls*additional_text_slider_value
+
+    faiss.normalize_L2(model_cls)
     
     #search best matches in index
     distances, ann = index.search(model_cls, k=k)

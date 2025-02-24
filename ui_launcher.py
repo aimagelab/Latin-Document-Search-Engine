@@ -93,7 +93,7 @@ def main(argv):
         
         number = H.model.top_k
         max_depth = H.model.filter_max_depth
-        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device)
+        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device, works_selected, additional_text, additional_text_slider_value)
         # best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
 
         #print(best_results)
