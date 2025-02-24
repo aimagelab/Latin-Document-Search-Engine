@@ -56,7 +56,8 @@ def main(argv):
     
     # create a list of authors, used to filter the results
     list_of_works = [e for e in os.listdir(H.data.json_dataset_path)]
-    list_of_works = set(list_of_works)
+    list_of_works = list(set(list_of_works))
+    list_of_works.insert(0, 'All')
     
     #TODO in the future change DB and index based on dropdown option
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
@@ -81,7 +82,8 @@ def main(argv):
     # cursor = connection.cursor()
 
 
-    def process_inputs(text, number):
+    # def process_inputs(text, number):
+    def process_inputs(text, number, works_selected, additional_text, additional_text_slider_value):
 
         if text=="":
             return f"""
@@ -90,6 +92,7 @@ def main(argv):
             </div> """
         
         number = H.model.top_k
+        max_depth = H.model.filter_max_depth
         best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device)
         # best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
 
@@ -175,19 +178,20 @@ def main(argv):
 
 
     demo = gr.Interface(
-    fn=process_inputs,
-    inputs=[
-        gr.Textbox(lines=5, 
-                    placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
-                    label="Enter query"),
-        gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
-    ],
-    outputs=gr.HTML(),
-    title="Latin Document Search Engine",
-    description="Enter a text query and the number of results you want to get. The system will search the documents for the best results and automatically sort them.",
+        fn=process_inputs,
+        inputs=[
+            gr.Textbox(lines=5, 
+                        placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
+                        label="Enter query"),
+            gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
+            gr.Dropdown(choices=list_of_works, label="Select Works", multiselect=False),
+            gr.Textbox(label="Additional Phrase", placeholder="Enter an additional phrase"),
+            gr.Slider(0, 1, step=0.01, label="How much weight should be given to the additional sentence compared to the main one.")
+        ],
+        outputs=gr.HTML(),
+        title="Latin Document Search Engine",
+        description="Enter a text query and the number of results you want to get. The system will search the documents for the best results and automatically sort them.",
     )
-
-
 
 
     demo.launch(server_name="0.0.0.0", share=True)
