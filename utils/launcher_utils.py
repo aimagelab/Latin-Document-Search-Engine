@@ -82,9 +82,9 @@ def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, 
         
         window_data = data_content['content'][content_id]
         if content_id - H.data.window_data > 0:
-            window_data = data_content['content'][content_id-H.data.window_data] + window_data
+            window_data = data_content['content'][content_id-H.data.window_data] + ' ' + window_data
         if content_id + H.data.window_data < len(data_content['content']):
-            window_data = window_data + data_content['content'][content_id+H.data.window_data]
+            window_data = window_data + ' ' + data_content['content'][content_id+H.data.window_data]
         
         json_result[r] = {}
         # json_result[r]['author_id'] = ...

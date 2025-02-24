@@ -24,9 +24,6 @@ import re
 
 from bs4 import BeautifulSoup
 
-SHOW_CIT = False
-SHOW_MATCH = True
-
 def highlight_words_in_html(html, parole, stile):
     soup = BeautifulSoup(html, "html.parser")  
     
@@ -84,7 +81,7 @@ def main(argv):
     # cursor = connection.cursor()
 
 
-    def process_inputs(text, number, option):
+    def process_inputs(text, number):
 
         if text=="":
             return f"""
@@ -92,8 +89,9 @@ def main(argv):
                 <p>Insert a valid query.</p>
             </div> """
         
+        number = H.model.top_k
+        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device)
         # best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
-        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device )
 
         #print(best_results)
         results = []
@@ -114,19 +112,18 @@ def main(argv):
             match_text = result['context'] # window of context of the passage
             cit = result['exact_match'] # represent the exact retrieved passage
            
-            if SHOW_MATCH:
-                #evidenzia nei risultati tutte le parole comuni con la query
-                words_text = re.findall(r'\b\w+\b', cit)  # Converting to lowercase per confronti insensibili al maiuscolo/minuscolo
+            # #evidenzia nei risultati tutte le parole comuni con la query
+            # words_text = re.findall(r'\b\w+\b', cit)  # Converting to lowercase per confronti insensibili al maiuscolo/minuscolo
 
-                #Controllare se ciascuna parola della query è presente nel test matchato
-                words_match_text = re.findall(r'\b\w+\b', match_text)  
+            # #Controllare se ciascuna parola della query è presente nel test matchato
+            # words_match_text = re.findall(r'\b\w+\b', match_text)  
 
-                #Troviamo le parole che si trovano in entrambe le stringhe
-                common_words = [word for word in words_text if word in words_match_text]
+            # #Troviamo le parole che si trovano in entrambe le stringhe
+            # common_words = [word for word in words_text if word in words_match_text]
 
-                stile_css = "font-weight: bold; text-decoration: underline; color: white"
-                # color: blue;
-                match_text = highlight_words_in_html(match_text, common_words, stile_css)
+            # stile_css = "font-weight: bold; text-decoration: underline; color: white"
+            # # color: blue;
+            # match_text = highlight_words_in_html(match_text, common_words, stile_css)
 
 
             # Creare una box per ogni risultato
@@ -183,7 +180,6 @@ def main(argv):
         gr.Textbox(lines=5, 
                     placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
                     label="Enter query"),
-        gr.Slider(1, 10, step=1, label="Choose how many results to return"),
         gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
     ],
     outputs=gr.HTML(),
