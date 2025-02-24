@@ -40,7 +40,7 @@ einops==0.8.0
 emoji==2.14.0
 etils==1.9.4
 exceptiongroup==1.2.2
-faiss==1.9.0
+# faiss==1.9.0
 fastapi==0.115.8
 ffmpy==0.5.0
 filelock==3.13.1
@@ -62,8 +62,8 @@ google-auth==2.35.0
 google-auth-httplib2==0.2.0
 google-pasta==0.2.0
 googleapis-common-protos==1.65.0
-gradio==5.14.0
-gradio_client==1.7.0
+gradio
+gradio_client
 greek-accentuation==1.2.0
 greenlet==3.1.1
 grpcio==1.66.2
@@ -79,6 +79,8 @@ httpx==0.28.0
 huggingface-hub==0.25.2
 humanize==4.11.0
 idna==3.10
+autofaiss==2.17.0
+faiss-cpu==1.7.4
 immutabledict==4.2.0
 importlib_resources==6.4.5
 itsdangerous==2.2.0
@@ -97,7 +99,7 @@ Markdown==3.7
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2
-mesh-tensorflow==0.1.21
+# mesh-tensorflow==0.1.21
 mkl-service==2.4.0
 mkl_fft
 mkl_random
@@ -109,6 +111,7 @@ multidict==6.1.0
 multiprocess==0.70.16
 murmurhash==1.0.10
 namex==0.0.8
+natsort
 nest-asyncio==1.6.0
 networkx==3.2.1
 ninja==1.11.1.2
@@ -144,10 +147,10 @@ preshed==3.0.9
 promise==2.3
 propcache==0.2.1
 proto-plus==1.24.0
-protobuf==5.29.1
+protobuf
 psutil==6.1.0
 py-cpuinfo==9.0.0
-pyarrow==17.0.0
+pyarrow==15.0.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pycld2==0.41
@@ -160,7 +163,7 @@ pynvml==12.0.0
 pyparsing==3.2.0
 pypng==0.20220715.0
 python-dateutil==2.9.0.post0
-python-multipart==0.0.20
+python-multipart==0.0.12
 pytz==2024.2
 PyYAML==6.0.2
 RapidFuzz==3.10.0
@@ -192,16 +195,16 @@ starlette==0.45.3
 stringcase==1.2.0
 sympy==1.12
 tensor2tensor==1.15.7
-tensorboard==2.17.1
-tensorboard-data-server==0.7.2
-tensorflow==2.17.0
-tensorflow-addons==0.23.0
-tensorflow-datasets==4.9.6
-tensorflow-gan==2.1.0
-tensorflow-hub==0.16.1
-tensorflow-io-gcs-filesystem==0.37.1
-tensorflow-metadata==1.16.1
-tensorflow-probability==0.7.0
+# tensorboard==2.17.1
+# tensorboard-data-server==0.7.2
+# tensorflow==2.17.0
+# tensorflow-addons==0.23.0
+# tensorflow-datasets==4.9.6
+# tensorflow-gan==2.1.0
+# tensorflow-hub==0.16.1
+# tensorflow-io-gcs-filesystem==0.37.1
+# tensorflow-metadata==1.16.1
+# tensorflow-probability==0.7.0
 tensorstore==0.1.66
 termcolor==2.5.0
 tf-slim==1.1.0
@@ -211,16 +214,16 @@ threadpoolctl==3.5.0
 tokenizers==0.20.1
 toml==0.10.2
 tomli==2.0.2
-tomlkit==0.13.2
+tomlkit==0.12.0
 toolz==1.0.0
-torch==2.4.0+cu118
-torchaudio==2.4.0+cu118
-torchvision==0.19.0+cu118
+# torch==2.4.0+cu118
+# torchaudio==2.4.0+cu118
+# torchvision==0.19.0+cu118
 tqdm==4.66.5
 transformers==4.45.2
 triton==3.0.0
 typeguard==2.13.3
-typer==0.15.1
+typer<0.10.0
 typing_extensions==4.12.2
 tzdata==2024.2
 ujson==5.10.0
@@ -230,7 +233,7 @@ uvicorn==0.34.0
 wandb==0.18.0
 wasabi==1.1.3
 weasel==0.3.4
-websockets==14.2
+websockets==12.0
 Werkzeug==3.0.4
 wrapt==1.16.0
 xxhash==3.5.0
