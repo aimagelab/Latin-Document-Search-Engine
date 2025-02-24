@@ -54,22 +54,19 @@ def get_config():
     model.model_max_length = 512
     #when decide to join two words w1-w2, check if w2 is in the top_k next words after w1
     model.top_k = 30
+    model.filter_max_depth = 1000
 
 
     config.index = index = ConfigDict()
     # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path"
     
-    # debug mode
-    # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/debug"
-    # index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/debug/knn.json"
-    
     index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/division_folder/embeds"
     index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/division_folder/ids/knn.json"
-    
-    # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path"
-    # index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/knn.json"
-
     index.index_name ="knn.index"
+    
+    # debug mode
+    # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/division_folder/debug"
+    # index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/division_folder/debug/knn.json"
 
     config.db = db = ConfigDict()
     db.db_path = ""

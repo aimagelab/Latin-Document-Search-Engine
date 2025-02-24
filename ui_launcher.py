@@ -4,7 +4,7 @@ from absl import flags
 from ml_collections.config_flags import config_flags
 import os
 import json
-from utils.launcher_utils import get_best_results, custom_get_best_results
+from utils.launcher_utils import get_best_results, custom_get_best_results, custom_get_best_results_filtered
 from transformers import AutoTokenizer, AutoModelForMaskedLM, AutoModel
 import torch
 from transformers import pipeline
@@ -92,16 +92,27 @@ def main(argv):
             </div> """
         
         number = H.model.top_k
-        max_depth = H.model.filter_max_depth
-        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device, works_selected, additional_text, additional_text_slider_value)
-        # best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
+        if works_selected is None:
+            best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value)
+        else:
+            max_depth = H.model.filter_max_depth
+            best_results = custom_get_best_results_filtered(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value, works_selected, max_depth)
 
-        #print(best_results)
+        results_html = ""
+        if len(best_results) == 0:
+            results_html += f"""
+            <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                <strong>No results found for {works_selected} in the first {max_depth} items.</strong>
+            </div>
+            """
+            return results_html
+        
+        best_results = dict(list(best_results.items())[:number])
+
         results = []
         for i in range(number):
             result = {
                 "Book": best_results[i]['book_name'],
-                # "author_id": best_results[i]['author_id'],
                 "id": best_results[i]['id'],
                 "name": best_results[i]['name'],
                 "context": best_results[i]['context'],
@@ -110,7 +121,6 @@ def main(argv):
             results.append(result)
 
         # Creare una stringa HTML per visualizzare tutti i risultati
-        results_html = ""
         for result in results:
             match_text = result['context'] # window of context of the passage
             cit = result['exact_match'] # represent the exact retrieved passage
