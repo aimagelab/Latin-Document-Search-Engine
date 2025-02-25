@@ -50,15 +50,13 @@ def get_config():
 
     model.tokenizer = "/work/pnrr_itserr/WP8-embeddings/checkpoints/models--bowphs--LaBerta/snapshots/94fab85783dca8a16529cda2b58760d03bd5d9c1"
     model.model = "/work/pnrr_itserr/WP8-embeddings/checkpoints/models--bowphs--LaBerta/snapshots/94fab85783dca8a16529cda2b58760d03bd5d9c1"
-    #max number of tokens the model can handle
-    model.model_max_length = 512
+    model.model_max_length = 512 #max number of tokens the model can handle
     #when decide to join two words w1-w2, check if w2 is in the top_k next words after w1
     model.top_k = 30
     model.filter_max_depth = 1000
 
 
     config.index = index = ConfigDict()
-    # index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path"
     
     index.index_path = "/work/pnrr_itserr/WP4-embeddings/index_path/division_folder/embeds"
     index.idx_2_keys = "/work/pnrr_itserr/WP4-embeddings/index_path/division_folder/ids/knn.json"

@@ -7,12 +7,9 @@ import json
 from utils.launcher_utils import get_best_results, custom_get_best_results, custom_get_best_results_filtered
 from transformers import AutoTokenizer, AutoModelForMaskedLM, AutoModel
 import torch
-from transformers import pipeline
 import faiss
 import pandas as pd
-import sqlite3
 import numpy as np
-import ast
 
 # Commandline arguments
 FLAGS = flags.FLAGS
@@ -59,7 +56,6 @@ def main(argv):
     list_of_works = list(set(list_of_works))
     list_of_works.insert(0, 'All')
     
-    #TODO in the future change DB and index based on dropdown option
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
     #load tokenizer and model
@@ -73,14 +69,7 @@ def main(argv):
     index = faiss.read_index(os.path.join(H.index.index_path,f"{H.index.index_name}"))
     with open(H.index.idx_2_keys, 'r') as f:
         idx_2_keys = json.load(f)
-
-    # create or open db
-    # path_to_load_db = os.path.join(H.db.db_path,f"{H.db.db_name}.db")
-    # connection = sqlite3.connect(path_to_load_db, check_same_thread=False)
-    # m = connection.total_changes
-    # assert m == 0, "ERROR: cannot open database."
-    # cursor = connection.cursor()
-
+    
 
     # def process_inputs(text, number):
     def process_inputs(text, number, works_selected, additional_text, additional_text_slider_value):
@@ -98,6 +87,7 @@ def main(argv):
             max_depth = H.model.filter_max_depth
             best_results = custom_get_best_results_filtered(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value, works_selected, max_depth)
 
+        # Creare una stringa HTML per visualizzare tutti i risultati
         results_html = ""
         if len(best_results) == 0:
             results_html += f"""
@@ -120,7 +110,6 @@ def main(argv):
             }
             results.append(result)
 
-        # Creare una stringa HTML per visualizzare tutti i risultati
         for result in results:
             match_text = result['context'] # window of context of the passage
             cit = result['exact_match'] # represent the exact retrieved passage
@@ -151,7 +140,6 @@ def main(argv):
             """
             # <strong>author_id:</strong> {result['author_id']}<br>
 
-        # Aggiungere il CSS per l'effetto hover
         results_html += """
         <style>
             .citation {

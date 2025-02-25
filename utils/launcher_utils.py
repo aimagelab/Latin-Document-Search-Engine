@@ -75,10 +75,8 @@ def custom_get_best_results(index, H, idx_2_keys, query, tokenizer, model, k=1, 
     json_result = {}
     r=0
     
-    #retrieve best results from db
+    #retrieve best results
     for idx in ann[0]:
-        # cursor.execute(f"SELECT * FROM {H.db.db_name} WHERE row_id = {idx+1}")
-        # rows = cursor.fetchall()
         idx_2_keys[idx]
         variable_split = idx_2_keys[idx].split('_')
         folder = '_'.join(variable_split[:-2])
@@ -137,7 +135,7 @@ def custom_get_best_results_filtered(index, H, idx_2_keys, query, tokenizer, mod
     json_result = {}
     r=0
     
-    #retrieve best results from db
+    #retrieve best results
     for idx in ann[0]:
         idx_2_keys[idx]
         variable_split = idx_2_keys[idx].split('_')
