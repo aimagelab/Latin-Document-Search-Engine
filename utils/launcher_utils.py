@@ -143,29 +143,28 @@ def custom_get_best_results_filtered(index, H, idx_2_keys, query, tokenizer, mod
         json_file = '_'.join(variable_split[:-1]) + '.json'
         
         # apply filter here 
-        if works_selected != 'All':
-            if works_selected == folder:
-                # it is necessary to remove one element from the content_id because the index starts from 1 when we tokenize the batch
-                content_id = int(variable_split[-1]) - 1
-                
-                file_open = os.path.join(H.data.json_dataset_path, folder, json_file)
-                with open(file_open, 'r') as f:
-                    data_content = json.load(f)
-                
-                window_data = data_content['content'][content_id]
-                if content_id - H.data.window_data > 0:
-                    window_data = data_content['content'][content_id-H.data.window_data] + ' ' + window_data
-                if content_id + H.data.window_data < len(data_content['content']):
-                    window_data = window_data + ' ' + data_content['content'][content_id+H.data.window_data]
-                
-                json_result[r] = {}
-                json_result[r]['id'] = idx_2_keys[idx]
-                json_result[r]['name'] = data_content['author']
-                json_result[r]['context'] = window_data
-                json_result[r]['exact_match'] = data_content['content'][content_id]
-                json_result[r]['book_name'] = data_content['title']
-                
-                r+=1
+        if works_selected == folder or works_selected == 'All':
+            # it is necessary to remove one element from the content_id because the index starts from 1 when we tokenize the batch
+            content_id = int(variable_split[-1]) - 1
+            
+            file_open = os.path.join(H.data.json_dataset_path, folder, json_file)
+            with open(file_open, 'r') as f:
+                data_content = json.load(f)
+            
+            window_data = data_content['content'][content_id]
+            if content_id - H.data.window_data > 0:
+                window_data = data_content['content'][content_id-H.data.window_data] + ' ' + window_data
+            if content_id + H.data.window_data < len(data_content['content']):
+                window_data = window_data + ' ' + data_content['content'][content_id+H.data.window_data]
+            
+            json_result[r] = {}
+            json_result[r]['id'] = idx_2_keys[idx]
+            json_result[r]['name'] = data_content['author']
+            json_result[r]['context'] = window_data
+            json_result[r]['exact_match'] = data_content['content'][content_id]
+            json_result[r]['book_name'] = data_content['title']
+            
+            r+=1
                 
         if r == k:
             break
