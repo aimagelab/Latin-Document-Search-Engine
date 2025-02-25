@@ -98,9 +98,10 @@ def main(argv):
             return results_html
         
         best_results = dict(list(best_results.items())[:number])
-
+        len_best_results = len(list(best_results.items()))
+        
         results = []
-        for i in range(number):
+        for i in range(len_best_results):
             result = {
                 "Book": best_results[i]['book_name'],
                 "id": best_results[i]['id'],
