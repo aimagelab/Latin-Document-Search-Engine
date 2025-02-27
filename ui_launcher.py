@@ -183,7 +183,7 @@ def main(argv):
                         placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
                         label="Enter query"),
             gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
-            gr.Dropdown(choices=list_of_works, label="Select Works", multiselect=False),
+            gr.Dropdown(choices=list_of_works, label="Select Author", multiselect=False),
             gr.Textbox(label="Additional Phrase", placeholder="Enter an additional phrase"),
             gr.Slider(0, 1, step=0.01, label="How much weight should be given to the additional sentence compared to the main one.")
         ],
