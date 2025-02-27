@@ -81,18 +81,19 @@ def main(argv):
             </div> """
         
         number = H.model.top_k
+        warning_author = None
         if works_selected is None:
             best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value)
         else:
             max_depth = H.model.filter_max_depth
-            best_results = custom_get_best_results_filtered(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value, works_selected, max_depth)
+            best_results, warning_author = custom_get_best_results_filtered(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value, works_selected, max_depth)
 
         # Creare una stringa HTML per visualizzare tutti i risultati
         results_html = ""
         if len(best_results) == 0:
             results_html += f"""
             <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
-                <strong>No results found for {works_selected} in the first {max_depth} items.</strong>
+                <strong>Attention: No results found for {works_selected} in the first {max_depth} items.</strong>
             </div>
             """
             return results_html
@@ -110,36 +111,45 @@ def main(argv):
                 "exact_match": best_results[i]['exact_match']
             }
             results.append(result)
-
-        for result in results:
-            match_text = result['context'] # window of context of the passage
-            cit = result['exact_match'] # represent the exact retrieved passage
-           
-            # #evidenzia nei risultati tutte le parole comuni con la query
-            # words_text = re.findall(r'\b\w+\b', cit)  # Converting to lowercase per confronti insensibili al maiuscolo/minuscolo
-
-            # #Controllare se ciascuna parola della query è presente nel test matchato
-            # words_match_text = re.findall(r'\b\w+\b', match_text)  
-
-            # #Troviamo le parole che si trovano in entrambe le stringhe
-            # common_words = [word for word in words_text if word in words_match_text]
-
-            # stile_css = "font-weight: bold; text-decoration: underline; color: white"
-            # # color: blue;
-            # match_text = highlight_words_in_html(match_text, common_words, stile_css)
-
-
-            # Creare una box per ogni risultato
+            
+        if warning_author == True:
             results_html += f"""
             <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
-                <strong>Book:</strong> {result['Book']}<br>
-                <strong>id:</strong> {result['id']}<br>
-                <strong>name:</strong> {result['name']}<br>
-                <strong>match:</strong> {match_text}<br>
-                <strong>citation:</strong> {cit}<br>
+                <strong>Attention: The following sentences may not be semantically related.</strong>
             </div>
             """
-            # <strong>author_id:</strong> {result['author_id']}<br>
+            
+            for result in results:
+                match_text = result['context'] # window of context of the passage
+                cit = result['exact_match'] # represent the exact retrieved passage
+            
+                # Creare una box per ogni risultato
+                results_html += f"""
+                <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                    <strong>Book:</strong> {result['Book']}<br>
+                    <strong>id:</strong> {result['id']}<br>
+                    <strong>name:</strong> {result['name']}<br>
+                    <strong>match:</strong> {match_text}<br>
+                    <strong>citation:</strong> {cit}<br>
+                </div>
+                """
+        
+        else:
+            for result in results:
+                match_text = result['context'] # window of context of the passage
+                cit = result['exact_match'] # represent the exact retrieved passage
+            
+                # Creare una box per ogni risultato
+                results_html += f"""
+                <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                    <strong>Book:</strong> {result['Book']}<br>
+                    <strong>id:</strong> {result['id']}<br>
+                    <strong>name:</strong> {result['name']}<br>
+                    <strong>match:</strong> {match_text}<br>
+                    <strong>citation:</strong> {cit}<br>
+                </div>
+                """
+                # <strong>author_id:</strong> {result['author_id']}<br>
 
         results_html += """
         <style>

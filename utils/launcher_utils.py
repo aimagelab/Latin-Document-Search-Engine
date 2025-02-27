@@ -134,16 +134,30 @@ def custom_get_best_results_filtered(index, H, idx_2_keys, query, tokenizer, mod
     
     json_result = {}
     r=0
+    finded = False
     
     #retrieve best results
-    for idx in ann[0]:
+    for val, idx in enumerate(ann[0]):
         idx_2_keys[idx]
         variable_split = idx_2_keys[idx].split('_')
         folder = '_'.join(variable_split[:-2])
         json_file = '_'.join(variable_split[:-1]) + '.json'
         
+        if val == H.model.top_author:
+            if finded == False:
+                warning_author = True
+            elif finded == True:
+                warning_author = False
+            else:
+                raise ValueError('finded variable not set')
+        if works_selected == 'All':
+            warning_author = False
+        
         # apply filter here 
         if works_selected == folder or works_selected == 'All':
+            if val <= H.model.top_author:
+                finded = True
+            
             # it is necessary to remove one element from the content_id because the index starts from 1 when we tokenize the batch
             content_id = int(variable_split[-1]) - 1
             
@@ -168,5 +182,5 @@ def custom_get_best_results_filtered(index, H, idx_2_keys, query, tokenizer, mod
                 
         if r == k:
             break
-        
-    return json_result
+    
+    return json_result, warning_author

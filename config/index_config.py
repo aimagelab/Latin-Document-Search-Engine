@@ -53,8 +53,8 @@ def get_config():
     model.model_max_length = 512 #max number of tokens the model can handle
     #when decide to join two words w1-w2, check if w2 is in the top_k next words after w1
     model.top_k = 30
-    model.filter_max_depth = 1000
-
+    model.top_author = 1000
+    model.filter_max_depth = 1000000
 
     config.index = index = ConfigDict()
     
