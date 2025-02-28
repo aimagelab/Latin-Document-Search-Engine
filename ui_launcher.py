@@ -119,13 +119,14 @@ def main(argv):
             </div>
             """
             
-            for result in results:
+            for inc_idx, result in enumerate(results):
                 match_text = result['context'] # window of context of the passage
                 cit = result['exact_match'] # represent the exact retrieved passage
             
                 # Creare una box per ogni risultato
                 results_html += f"""
                 <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                    <strong>Passage incremental ID:</strong> {inc_idx+1}<br>
                     <strong>Book:</strong> {result['Book']}<br>
                     <strong>id:</strong> {result['id']}<br>
                     <strong>name:</strong> {result['name']}<br>
@@ -135,13 +136,14 @@ def main(argv):
                 """
         
         else:
-            for result in results:
+            for inc_idx, result in enumerate(results):
                 match_text = result['context'] # window of context of the passage
                 cit = result['exact_match'] # represent the exact retrieved passage
             
                 # Creare una box per ogni risultato
                 results_html += f"""
                 <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                    <strong>Passage incremental ID:</strong> {inc_idx+1}<br>
                     <strong>Book:</strong> {result['Book']}<br>
                     <strong>id:</strong> {result['id']}<br>
                     <strong>name:</strong> {result['name']}<br>
