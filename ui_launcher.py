@@ -4,15 +4,12 @@ from absl import flags
 from ml_collections.config_flags import config_flags
 import os
 import json
-from utils.launcher_utils import get_best_results, custom_get_best_results
+from utils.launcher_utils import get_best_results, custom_get_best_results, custom_get_best_results_filtered
 from transformers import AutoTokenizer, AutoModelForMaskedLM, AutoModel
 import torch
-from transformers import pipeline
 import faiss
 import pandas as pd
-import sqlite3
 import numpy as np
-import ast
 
 # Commandline arguments
 FLAGS = flags.FLAGS
@@ -23,9 +20,6 @@ import unicodedata
 import re
 
 from bs4 import BeautifulSoup
-
-SHOW_CIT = False
-SHOW_MATCH = True
 
 def highlight_words_in_html(html, parole, stile):
     soup = BeautifulSoup(html, "html.parser")  
@@ -56,8 +50,12 @@ def normalize_text(text):
 def main(argv):
 
     H = FLAGS.config
-
-    #TODO in the future change DB and index based on dropdown option
+    
+    # create a list of authors, used to filter the results
+    list_of_works = [e for e in os.listdir(H.data.json_dataset_path)]
+    list_of_works = list(set(list_of_works))
+    list_of_works.insert(0, 'All')
+    
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
     #load tokenizer and model
@@ -71,16 +69,10 @@ def main(argv):
     index = faiss.read_index(os.path.join(H.index.index_path,f"{H.index.index_name}"))
     with open(H.index.idx_2_keys, 'r') as f:
         idx_2_keys = json.load(f)
+    
 
-    # create or open db
-    # path_to_load_db = os.path.join(H.db.db_path,f"{H.db.db_name}.db")
-    # connection = sqlite3.connect(path_to_load_db, check_same_thread=False)
-    # m = connection.total_changes
-    # assert m == 0, "ERROR: cannot open database."
-    # cursor = connection.cursor()
-
-
-    def process_inputs(text, number, option):
+    # def process_inputs(text, number):
+    def process_inputs(text, number, works_selected, additional_text, additional_text_slider_value):
 
         if text=="":
             return f"""
@@ -88,56 +80,79 @@ def main(argv):
                 <p>Insert a valid query.</p>
             </div> """
         
-        # best_results = get_best_results(index, H, cursor, text, tokenizer, model, number, device )
-        best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device )
+        number = H.model.top_k
+        warning_author = None
+        if works_selected is None:
+            best_results = custom_get_best_results(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value)
+        else:
+            max_depth = H.model.filter_max_depth
+            best_results, warning_author = custom_get_best_results_filtered(index, H, idx_2_keys, text, tokenizer, model, number, device, additional_text, additional_text_slider_value, works_selected, max_depth)
 
-        #print(best_results)
+        # Creare una stringa HTML per visualizzare tutti i risultati
+        results_html = ""
+        if len(best_results) == 0:
+            results_html += f"""
+            <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                <strong>Attention: No results found for {works_selected} in the first {max_depth} items.</strong>
+            </div>
+            """
+            return results_html
+        
+        best_results = dict(list(best_results.items())[:number])
+        len_best_results = len(list(best_results.items()))
+        
         results = []
-        for i in range(number):
+        for i in range(len_best_results):
             result = {
                 "Book": best_results[i]['book_name'],
-                # "author_id": best_results[i]['author_id'],
                 "id": best_results[i]['id'],
                 "name": best_results[i]['name'],
                 "context": best_results[i]['context'],
                 "exact_match": best_results[i]['exact_match']
             }
             results.append(result)
-
-        # Creare una stringa HTML per visualizzare tutti i risultati
-        results_html = ""
-        for result in results:
-            match_text = result['context'] # window of context of the passage
-            cit = result['exact_match'] # represent the exact retrieved passage
-           
-            if SHOW_MATCH:
-                #evidenzia nei risultati tutte le parole comuni con la query
-                words_text = re.findall(r'\b\w+\b', cit)  # Converting to lowercase per confronti insensibili al maiuscolo/minuscolo
-
-                #Controllare se ciascuna parola della query è presente nel test matchato
-                words_match_text = re.findall(r'\b\w+\b', match_text)  
-
-                #Troviamo le parole che si trovano in entrambe le stringhe
-                common_words = [word for word in words_text if word in words_match_text]
-
-                stile_css = "font-weight: bold; text-decoration: underline; color: white"
-                # color: blue;
-                match_text = highlight_words_in_html(match_text, common_words, stile_css)
-
-
-            # Creare una box per ogni risultato
+            
+        if warning_author == True:
             results_html += f"""
             <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
-                <strong>Book:</strong> {result['Book']}<br>
-                <strong>id:</strong> {result['id']}<br>
-                <strong>name:</strong> {result['name']}<br>
-                <strong>match:</strong> {match_text}<br>
-                <strong>citation:</strong> {cit}<br>
+                <strong>Attention: The following sentences may not be semantically related.</strong>
             </div>
             """
-            # <strong>author_id:</strong> {result['author_id']}<br>
+            
+            for inc_idx, result in enumerate(results):
+                match_text = result['context'] # window of context of the passage
+                cit = result['exact_match'] # represent the exact retrieved passage
+            
+                # Creare una box per ogni risultato
+                results_html += f"""
+                <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                    <strong>Passage incremental ID:</strong> {inc_idx+1}<br>
+                    <strong>Book:</strong> {result['Book']}<br>
+                    <strong>id:</strong> {result['id']}<br>
+                    <strong>name:</strong> {result['name']}<br>
+                    <strong>match:</strong> {match_text}<br>
+                    <strong>citation:</strong> {cit}<br>
+                </div>
+                """
+        
+        else:
+            for inc_idx, result in enumerate(results):
+                match_text = result['context'] # window of context of the passage
+                cit = result['exact_match'] # represent the exact retrieved passage
+            
+                # Creare una box per ogni risultato
+                results_html += f"""
+                <div style="border: 2px solid #ccc; padding: 10px; margin-bottom: 10px; color: white; background-color: #1f2937">
+                    <strong>Passage incremental ID:</strong> {inc_idx+1}<br>
+                    <strong>Book:</strong> {result['Book']}<br>
+                    <strong>id:</strong> {result['id']}<br>
+                    <strong>name:</strong> {result['name']}<br>
+                    <strong>match:</strong> {match_text}<br>
+                    <strong>citation:</strong> {cit}<br>
+                </div>
+                """
+                # <strong>author_id:</strong> {result['author_id']}<br>
 
-        # Aggiungere il CSS per l'effetto hover
         results_html += """
         <style>
             .citation {
@@ -174,20 +189,20 @@ def main(argv):
 
 
     demo = gr.Interface(
-    fn=process_inputs,
-    inputs=[
-        gr.Textbox(lines=5, 
-                    placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
-                    label="Enter query"),
-        gr.Slider(1, 10, step=1, label="Choose how many results to return"),
-        gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
-    ],
-    outputs=gr.HTML(),
-    title="Latin Document Search Engine",
-    description="Enter a text query and the number of results you want to get. The system will search the documents for the best results and automatically sort them.",
+        fn=process_inputs,
+        inputs=[
+            gr.Textbox(lines=5, 
+                        placeholder="Servius ad Virgil. Aen. III, 334: [Chaonios cognomine Campos] Epirum campos non habere omnibus notum est.",
+                        label="Enter query"),
+            gr.Dropdown(["DB_Latin"], label="Select the database where to search"),
+            gr.Dropdown(choices=list_of_works, label="Select Author", multiselect=False),
+            gr.Textbox(label="Additional Phrase", placeholder="Enter an additional phrase"),
+            gr.Slider(0, 1, step=0.01, label="How much weight should be given to the additional sentence compared to the main one.")
+        ],
+        outputs=gr.HTML(),
+        title="Latin Document Search Engine",
+        description="Enter a text query and the number of results you want to get. The system will search the documents for the best results and automatically sort them.",
     )
-
-
 
 
     demo.launch(server_name="0.0.0.0", share=True)
